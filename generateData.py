@@ -1,20 +1,20 @@
-from datetime import datetime
-import json
 import csv
+import json
+from datetime import datetime
 
 
 DEFAULT_MULTIPLIER = 1
-ADD_MULTIPLIER = 1
-
-months = {
+ADD_MULTIPLIER = .5
+MONTH = None
+MONTHS = {
     "May": "19.und 20. Mai",
     "June": "23. und 24. Juni",
     "July": "14. und 15. Juli"
 }
 
 dt = datetime.now()
-month = dt.strftime("%B")
-month_str = months[month]
+month = MONTH if MONTH else dt.strftime("%B")
+month_str = MONTHS[month]
 
 data = dict()
 
@@ -34,9 +34,9 @@ with open('HackTogether_ Anmeldeseite Teilnehmer.csv', 'r') as csvfile:
         name = f"{firstname} {lastname}"
 
         if month_str in dates.split(";") and \
-                (name not in data.keys() or timestamp > data[name]["Zeitstempel"]):
+                (name not in data.keys() or timestamp > data[name]["timestamp"]):
             if friends != "":
-                friends_input = input(f"[{friends}]: ")
+                friends_input = input(f"{name} [{friends}]: ")
                 if friends_input == "-":
                     friends = ""
                 elif friends_input != "":
@@ -52,18 +52,17 @@ with open('HackTogether_ Anmeldeseite Teilnehmer.csv', 'r') as csvfile:
             blockchain = float(blockchain.split(" ")[0])
             git = float(git.split(" ")[0])
 
-            manager_value = scrum + blockchain
+            manager_value = printer + scrum + blockchain
             analyst_value = backend + data_science
-            designer_value = graphics
+            designer_value = frontend + printer + graphics
             coder_value = backend + frontend + app_programming + git
-            engineer_value = backend + printer + git
 
-            roles = preferred_roles.split(";")
             manager_multiplier = DEFAULT_MULTIPLIER
             analyst_multiplier = DEFAULT_MULTIPLIER
             designer_multiplier = DEFAULT_MULTIPLIER
             coder_multiplier = DEFAULT_MULTIPLIER
-            engineer_multiplier = DEFAULT_MULTIPLIER
+
+            roles = preferred_roles.split(";")
             if "Projektmanagement" in roles:
                 manager_multiplier += ADD_MULTIPLIER
             if "Softwareentwicklung" in roles:
@@ -75,10 +74,10 @@ with open('HackTogether_ Anmeldeseite Teilnehmer.csv', 'r') as csvfile:
             if "Datenauswertung" in roles:
                 analyst_multiplier += ADD_MULTIPLIER
             if "3D-Druck" in roles:
+                manager_multiplier += ADD_MULTIPLIER
                 designer_multiplier += ADD_MULTIPLIER
-                engineer_multiplier += ADD_MULTIPLIER
             if "Robotik" in roles:
-                engineer_multiplier += ADD_MULTIPLIER
+                coder_multiplier += ADD_MULTIPLIER
             if "Künstliche Intelligenz" in roles:
                 manager_multiplier += ADD_MULTIPLIER
                 coder_multiplier += ADD_MULTIPLIER
@@ -92,16 +91,16 @@ with open('HackTogether_ Anmeldeseite Teilnehmer.csv', 'r') as csvfile:
             analyst = analyst_value * analyst_multiplier * skill_multiplier
             designer = designer_value * designer_multiplier * skill_multiplier
             coder = coder_value * coder_multiplier * skill_multiplier
-            engineer = engineer_value * engineer_multiplier * skill_multiplier
 
             data[name] = {
-                "Zeitstempel": timestamp,
-                "Freunde": friends.split(", "),
-                "Manager": round(manager, 2),
-                "Analyst": round(analyst, 2),
-                "Designer": round(designer, 2),
-                "Coder": round(coder, 2),
-                "Engineer": round(engineer, 2)
+                "timestamp": timestamp,
+                "friends": friends.split(", "),
+                "skills": {
+                    "manager": round(manager, 2),
+                    "analyst": round(analyst, 2),
+                    "designer": round(designer, 2),
+                    "coder": round(coder, 2)
+                }
             }
 
 with open('data.json', 'w', encoding='utf8') as outfile:
