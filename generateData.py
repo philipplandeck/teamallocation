@@ -5,7 +5,7 @@ from datetime import datetime
 
 DEFAULT_MULTIPLIER = 1
 ADD_MULTIPLIER = .5
-MONTH = None
+MONTH = "June"
 MONTHS = {
     "May": "19.und 20. Mai",
     "June": "23. und 24. Juni",

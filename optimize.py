@@ -109,6 +109,31 @@ def create_teams(data):
         else:
             break
 
+    # Berücksichtige Teamwünsche
+    for group in friend_groups:
+        # Suche das Team, das die meisten Teilnehmer der friend_group enthält
+        max_team_index = -1
+        max_member_count = 0
+        for i, team in enumerate(teams):
+            member_count = sum(member in group for member in team)
+            if member_count > max_member_count:
+                max_member_count = member_count
+                max_team_index = i
+
+        # Verschiebe die Teilnehmer der friend_group in das Team
+        for i, team in enumerate(teams):
+            if i != max_team_index:
+                # Tausche die Teilnehmer zwischen den Teams
+                for member in team:
+                    if member in group:
+                        team.remove(member)
+                        teams[max_team_index].append(member)
+                        for name in teams[max_team_index]:
+                            if not is_name_in_friend_groups(name, friend_groups):
+                                teams[max_team_index].remove(name)
+                                team.append(name)
+                                break
+
     # Schreibe die Teams in eine Textdatei
     with open('teams.txt', 'w', encoding='utf8') as outfile:
         for i, team in enumerate(teams):
@@ -118,6 +143,13 @@ def create_teams(data):
                 outfile.write(f"- {participant}\n")
             if i != len(teams) - 1:
                 outfile.write("\n")
+
+
+def is_name_in_friend_groups(name, friend_groups):
+    for group in friend_groups:
+        if name in group:
+            return True
+    return False
 
 
 create_skill_groups(data)
